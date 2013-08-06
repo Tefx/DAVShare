@@ -4,8 +4,8 @@ aptitude install -y apache2 libapache2-mod-encoding  libapache2-mod-wsgi python-
 a2enmod dav* encoding rewrite wsgi authn_dbd
 pip install watchdog Flask-SQLAlchemy
 git clone https://github.com/Tefx/DAVShare.git /var/www/DAVShare
-python /var/www/DAVShare/web.py
 mkdir -p /var/www/webdav/all
+python /var/www/DAVShare/web.py
 chown www-data /var/www/webdav/ /var/www/DAVShare/ /var/www/DAVShare/DAVShare.db
 mv /var/www/DAVShare/config/davshare /etc/apache2/sites-available/
 a2ensite davshare
