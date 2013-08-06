@@ -24,6 +24,8 @@ class EventHandler(FileSystemEventHandler):
 			return False
 		elif fake_user == "all":
 			return False
+		elif os.path.split(os.path.abspath(src))[1] == "all":
+			return False
 		else:
 			return True
 
