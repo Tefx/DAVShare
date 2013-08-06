@@ -19,9 +19,10 @@ class EventHandler(FileSystemEventHandler):
 		return os.path.join(self.all_path, "(Uploaded_by_%s)_%s" % (user, filename))
 
 	def is_top(self, src):
-		if os.path.split(os.path.split(os.path.abspath(src))[0])[0] != self.root.rstrip(os.sep):
+		fake_root, fake_user = os.path.split(os.path.split(os.path.abspath(src))[0])
+		if fake_root != self.root.rstrip(os.sep):
 			return False
-		elif os.path.split(src)[1] == "all":
+		elif fake_user == "all":
 			return False
 		else:
 			return True
