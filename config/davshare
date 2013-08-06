@@ -1,0 +1,71 @@
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+
+	DocumentRoot /var/www
+
+	WSGIDaemonProcess DAVShare threads=5
+	WSGIScriptAlias / /var/www/DAVShare/DAVShare.wsgi
+
+	DBDriver        sqlite3
+	DBDParams       "/var/www/DAVShare/DAVShare.db"
+	DBDMin 1
+	DBDKeep 2
+	DBDMax 10
+	DBDExptime 60
+
+	<Location />
+		WSGIProcessGroup DAVShare
+		WSGIApplicationGroup %{GLOBAL}
+		Order deny,allow
+		Allow from all
+	</Location>
+
+	<Location /useradmin>
+	        AuthName "WebDAV"
+	        AuthType Basic
+		AuthBasicProvider dbd
+		AuthDBDUserPWQuery "SELECT password FROM user WHERE username=%s"
+		<Limit GET POST>
+			require user admin
+		</Limit>
+	</Location>
+
+	alias /webdav/ /var/www/webdav/
+
+	<Location "/webdav/">
+		DAV On
+	        Options Indexes MultiViews FollowSymlinks
+	        AuthName "WebDAV"
+	        AuthType Basic
+		AuthBasicProvider dbd
+		AuthDBDUserPWQuery "SELECT password FROM user WHERE username=%s"
+	        require valid-user
+	</Location>
+
+	<Location "/webdav/all">
+		<limit GET OPTIONS PROPFIND>
+	                require valid-user
+	        </Limit>
+	        <LimitExcept GET OPTIONS PROPFIND>
+	                require user admin
+	        </LimitExcept>
+	</Location>
+
+	<Directory /var/www/>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Order allow,deny
+		allow from all
+	</Directory>
+
+	RewriteEngine On
+	RewriteCond %{LA-U:REMOTE_USER} (.+)
+	RewriteCond %{LA-U:REMOTE_USER} ^(?!admin$)
+	RewriteRule ^/webdav/(.*) /webdav/%{LA-U:REMOTE_USER}/$1
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	LogLevel warn
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	RewriteLog ${APACHE_LOG_DIR}/rewrite.log
+	RewriteLogLevel 9
+</VirtualHost>

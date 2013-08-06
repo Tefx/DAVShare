@@ -5,7 +5,13 @@ import subprocess
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+
 class EventHandler(FileSystemEventHandler):
+
+	def __init__(self, root):
+		super(EventHandler, self).__init__()
+		self.root = root
+		self.all_path = os.path.join(self.root, "all")
 
 	def gen_dest(self, src):
 		path, filename = os.path.split(src)
@@ -54,17 +60,10 @@ class EventHandler(FileSystemEventHandler):
 
 
 class Monitor(object):
-	def __init__(self, root, all_path):
-		self.event_handler = EventHandler()
-		self.event_handler.all_path = all_path
-		self.event_handler.root = root
+	def __init__(self, root):
+		self.event_handler = EventHandler(root)
 		self.observer = Observer()
-		self.root = root
-
-	def add_user(self, user):
-		home = os.path.join(self.root, user)
-		print "Wathcing", home
-		self.observer.schedule(self.event_handler, home, False)
+		self.observer.schedule(self.event_handler, root, True)
 
 	def loop(self):
 		self.observer.start()
@@ -78,8 +77,4 @@ class Monitor(object):
 
 if __name__ == '__main__':
 	from sys import argv
-	monitor = Monitor("/var/www/webdav/", "/var/www/webdav/all/")
-	for user in argv[1:]:
-		print "Add user", user
-		monitor.add_user(user)
-	monitor.loop()
+	Monitor(argv[1]).loop()
