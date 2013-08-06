@@ -64,4 +64,6 @@ def useradmin(method=None):
 	return render_template("useradmin.html", add_form=add_form, del_form=delete_form, users=uc.list())
 
 if __name__ == '__main__':
-	db.create_all()
+	if not os.path.exists("/var/www/DAVShare/DAVShare.db"):
+		db.create_all()
+	uc.add("admin", "admin", "admin")
